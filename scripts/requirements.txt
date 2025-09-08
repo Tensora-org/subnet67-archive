@@ -1,0 +1,9 @@
+# Web3 and Ethereum dependencies
+web3>=7.0.0
+eth-account>=0.13.0
+
+# Bittensor dependencies (for validator.py)
+bittensor>=9.0.0
+
+# Dotenv dependencies
+python-dotenv>=1.0.0
