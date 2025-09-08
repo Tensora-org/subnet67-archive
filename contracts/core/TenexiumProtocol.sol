@@ -509,7 +509,7 @@ contract TenexiumProtocol is
      * @notice Remove liquidity from the protocol
      * @param amount Amount of liquidity to remove (0 for all)
      */
-    function removeLiquidity(uint256 amount) external whenNotPaused nonReentrant lpRateLimit {
+    function removeLiquidity(uint256 amount) external nonReentrant lpRateLimit {
         _removeLiquidity(amount);
         _updateLiquidityCircuitBreaker();
     }
