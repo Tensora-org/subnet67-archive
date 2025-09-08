@@ -1,0 +1,25 @@
+{
+  "network": "testnet",
+  "deployer": "0xD17863aa942F5e0C611ABE6E1Ba2256147E71e89",
+  "timestamp": "2025-09-05T15:34:15.017Z",
+  "tenexiumProtocol": {
+    "proxy": "0x40325E3A28247cA79207c0C75a878444bF4f7991",
+    "implementation": "0x80c1AAC2A51dAf4e275a8cDeD0A21c57049fb02a",
+    "address": "0x40325E3A28247cA79207c0C75a878444bF4f7991"
+  },
+  "lastUpdated": "2025-09-08T17:41:26.893Z",
+  "newImplementation": {
+    "address": "0xf22135137F3D802f3932c480997Ed76890dEB04d",
+    "deployedAt": "2025-09-08T17:41:02.175Z",
+    "deployer": "0xD17863aa942F5e0C611ABE6E1Ba2256147E71e89"
+  },
+  "upgrades": {
+    "0x12ac163e29d81369589aa0ef01e568838ce824d0a3ab1bdf2190562f5d31feba": {
+      "previousImplementation": "0xD85b1948Ed9F46272D759969d1768814F44f94f0",
+      "newImplementation": "0xf22135137F3D802f3932c480997Ed76890dEB04d",
+      "upgradeTxHash": "0x12ac163e29d81369589aa0ef01e568838ce824d0a3ab1bdf2190562f5d31feba",
+      "upgradedAt": "2025-09-08T17:41:26.893Z",
+      "upgradedBy": "0xD17863aa942F5e0C611ABE6E1Ba2256147E71e89"
+    }
+  }
+}
