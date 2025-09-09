@@ -128,7 +128,7 @@ const deployConfig: DeployConfig = {
 
     // Subnet manager
     versionKey: "1",
-    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "100",
+    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "5",
 };
 
 export default deployConfig; 
