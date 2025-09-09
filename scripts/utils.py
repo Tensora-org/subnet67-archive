@@ -8,10 +8,10 @@ from dotenv import load_dotenv
 
 class TenexUtils:
     @staticmethod
-    def get_tenexium_protocol_address(network_name: str) -> str:
+    def get_proxy_address(network_name: str, contract_name: str) -> str:
         """Get TenexiumProtocol contract address from deployment config"""
         deployments_dir = Path(__file__).parent.parent / "deployments"
-        file_path = deployments_dir / f"{network_name}.json"
+        file_path = deployments_dir / f"{network_name}-{contract_name}.json"
         
         if not file_path.exists():
             raise FileNotFoundError(f"Deployment config not found for {network_name}")
@@ -32,7 +32,7 @@ class TenexUtils:
             raise ValueError(f"Unsupported network: {network_name}")
     
     @staticmethod
-    def get_signer_for_miner(network: str) -> tuple[Web3, Account]:
+    def get_signer_for_miner(network: str) -> tuple[Web3, Account, str]:
         """Get Web3 instance and account from MINER_ETH_PRIVATE_KEY"""
         load_dotenv()
         private_key = os.getenv("MINER_ETH_PRIVATE_KEY")
@@ -42,11 +42,15 @@ class TenexUtils:
         # Remove 0x prefix if present
         if private_key.startswith("0x"):
             private_key = private_key[2:]
+
+        hotkey = os.getenv("MINER_HOTKEY")
+        if not hotkey:
+            raise ValueError("MINER_HOTKEY environment variable is required")
             
         w3 = TenexUtils.get_web3_instance(network)
         account = Account.from_key(private_key)
         
-        return w3, account
+        return w3, account, hotkey
 
     @staticmethod
     def get_web3_instance(network: str) -> Web3:
@@ -150,13 +154,23 @@ class TenexUtils:
                     "type": "function",
                 }
             ]
+        elif function_name == "setAssociate":
+            return [
+                {
+                    "inputs": [{"type": "bytes32", "name": "hotkey"}],
+                    "name": "setAssociate",
+                    "outputs": [{"type": "bool", "name": ""}],
+                    "stateMutability": "nonpayable",
+                    "type": "function",
+                }
+            ]
         else:
             raise ValueError(f"Unsupported function: {function_name}")
 
     @staticmethod
-    def get_contract(function_name:str, w3: Web3, network: str) -> Any:
+    def get_contract(function_name:str, w3: Web3, network: str, contract_name: str) -> Any:
         """Get contract for the specified function"""
         return w3.eth.contract(
-            address=TenexUtils.get_tenexium_protocol_address(network),
+            address=TenexUtils.get_proxy_address(network, contract_name),
             abi=TenexUtils.get_contract_abi(function_name)
         )
