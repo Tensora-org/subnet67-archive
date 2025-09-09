@@ -46,6 +46,10 @@ export interface DeployConfig {
 
     // Function permissions (default)
     functionPermissions: boolean[];
+
+    // Subnet manager
+    versionKey: string;
+    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: string;
 }
 
 const deployConfig: DeployConfig = {
@@ -120,7 +124,11 @@ const deployConfig: DeployConfig = {
     protocolValidatorHotkey: "0x4492d90ca4f56368e7a06ceeaea3859d312f12280df357d790637674b928df67",
 
     // Function permissions (default)
-    functionPermissions: [false, false, false]
+    functionPermissions: [false, false, false],
+
+    // Subnet manager
+    versionKey: "1",
+    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "5",
 };
 
 export default deployConfig; 

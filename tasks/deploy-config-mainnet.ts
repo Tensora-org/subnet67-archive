@@ -46,15 +46,19 @@ export interface DeployConfig {
 
     // Function permissions (default)
     functionPermissions: boolean[];
+
+    // Subnet manager
+    versionKey: string;
+    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: string;
 }
 
 const deployConfig: DeployConfig = {
     // Liquidity guardrails & rate limits
-    minLiquidityThreshold: "100000000000000000000",   // 100 TAO
+    minLiquidityThreshold: "1000000000000000000000",   // 1000 TAO
     maxUtilizationRate: "900000000",                  // 90% (PRECISION=1e9)
     liquidityBufferRatio: "200000000",                // 20% (PRECISION=1e9)
-    userCooldownBlocks: "10",                         // 10 blocks
-    lpCooldownBlocks: "10",                           // 10 blocks
+    userCooldownBlocks: "1",                         // 1 blocks
+    lpCooldownBlocks: "360",                           // 360 blocks
     
     // Buyback economics
     buybackExecutionThreshold: "1000000000000000000", // min balance to execute buyback (wei)
@@ -120,7 +124,11 @@ const deployConfig: DeployConfig = {
     protocolValidatorHotkey: "0x4492d90ca4f56368e7a06ceeaea3859d312f12280df357d790637674b928df67",
 
     // Function permissions (default)
-    functionPermissions: [false, false, false]
+    functionPermissions: [false, false, false],
+
+    // Subnet manager
+    versionKey: "1",
+    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "5",
 };
 
 export default deployConfig; 
