@@ -127,7 +127,7 @@ const deployConfig: DeployConfig = {
     functionPermissions: [false, false, false],
 
     // Subnet manager
-    versionKey: "1",
+    versionKey: "2",
     MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "5",
 };
 

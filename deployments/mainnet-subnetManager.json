@@ -1,11 +1,11 @@
 {
   "network": "mainnet",
-  "deployer": "0x7166F8a1289854c7F1a0AcFBe6Bfb75677Ac6CFD",
-  "timestamp": "2025-09-09T14:30:01.876Z",
+  "deployer": "0x72838d8A057a3d3d137DA3B340681fb3A7dd0ce6",
+  "timestamp": "2025-09-09T19:57:37.821Z",
   "tenexiumProtocol": {
-    "proxy": "0x0dc695f77888889FA9322A248FfeD61847b9660D",
-    "implementation": "0x361a31177DA1983637cA132022636F85eCc9F2A3",
-    "address": "0x0dc695f77888889FA9322A248FfeD61847b9660D"
+    "proxy": "0xf8626044aBDd6cbFF9bB52C4ef6587F455Efa74E",
+    "implementation": "0x380ED7E1d332656AebDC4173f2b03BAF5C0Cd4F0",
+    "address": "0xf8626044aBDd6cbFF9bB52C4ef6587F455Efa74E"
   },
-  "lastUpdated": "2025-09-09T14:30:01.876Z"
+  "lastUpdated": "2025-09-09T19:57:37.822Z"
 }
