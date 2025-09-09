@@ -1,22 +1,28 @@
 import { ethers } from "hardhat";
 import * as fs from "fs";
 import * as path from "path";
-
-import type { TenexiumProtocol } from "../../typechain/contracts/core/TenexiumProtocol";
+import { TenexiumProtocol } from "../../typechain/contracts/core/TenexiumProtocol";
+import { SubnetManager } from "../../typechain/contracts/modules/SubnetManager.sol/SubnetManager";
 
 // Interface for contract setup return type
-interface ContractSetup {
+interface ContractSetupForTenexium {
     provider: any;
     signer: any;
     contract: TenexiumProtocol;
     user: any;
 }
 
+interface ContractSetupForSubnetManager {
+    provider: any;
+    signer: any;
+    contract: SubnetManager;
+}
+
 // Utility functions
 const utils = {
-    getTenexiumProtocolAddress(networkName: string): string {
+    getProxyAddress(networkName: string, contractName: string): string {
         const deploymentsDir = path.join(__dirname, "../..", "deployments");
-        const filePath = path.join(deploymentsDir, `${networkName}.json`);
+        const filePath = path.join(deploymentsDir, `${networkName}-${contractName}.json`);
         const existingData = fs.existsSync(filePath) 
             ? JSON.parse(fs.readFileSync(filePath, "utf8"))
             : {};
@@ -31,11 +37,11 @@ const utils = {
             throw new Error(`Unsupported network: ${networkName}`);
         }
     },
-    async getTenexiumProtocolContract(networkName: string): Promise<ContractSetup> {
+    async getTenexiumProtocolContract(networkName: string): Promise<ContractSetupForTenexium> {
         const provider = new ethers.JsonRpcProvider(this.getRpcUrl(networkName));
         const signer = new ethers.Wallet(process.env.ETH_PRIVATE_KEY!, provider);
         const user = new ethers.Wallet(process.env.USER_PRIVATE_KEY!, provider);
-        const contractAddress = this.getTenexiumProtocolAddress(networkName);
+        const contractAddress = this.getProxyAddress(networkName, "tenexiumProtocol");
         const contract = await ethers.getContractAt("TenexiumProtocol", contractAddress, signer) as any as TenexiumProtocol;
         
         return {
@@ -44,8 +50,20 @@ const utils = {
             contract,
             user
         };
+    },
+    async getSubnetManagerContract(networkName: string): Promise<ContractSetupForSubnetManager> {
+        const provider = new ethers.JsonRpcProvider(this.getRpcUrl(networkName));
+        const signer = new ethers.Wallet(process.env.ETH_PRIVATE_KEY!, provider);
+        const user = new ethers.Wallet(process.env.USER_PRIVATE_KEY!, provider);
+        const contractAddress = this.getProxyAddress(networkName, "subnetManager");
+        const contract = await ethers.getContractAt("SubnetManager", contractAddress, signer) as any as SubnetManager;
+        return {
+            provider,
+            signer,
+            contract,
+        };
     }
 };
 
 export default utils;
-export type { TenexiumProtocol, ContractSetup };
+export type { ContractSetupForTenexium, ContractSetupForSubnetManager };

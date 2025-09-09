@@ -63,12 +63,12 @@ contract SubnetManager is OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUp
         MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY = _MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY;
     }
 
-    function SetWeights() external nonReentrant {
-        (uint16[] memory dests, uint16[] memory weightsArray) = _getWeights();
+    function setWeights() external nonReentrant {
+        (uint16[] memory dests, uint16[] memory weightsArray) = getWeights();
         _setWeights(dests, weightsArray);
     }
 
-    function _getWeights() internal view returns (uint16[] memory dests, uint16[] memory weights) {
+    function getWeights() public view returns (uint16[] memory dests, uint16[] memory weights) {
         uint256[] memory unnormalizedWeights;
         (dests, unnormalizedWeights) = _getUnnormalizedWeights();
         weights = new uint16[](unnormalizedWeights.length);
@@ -78,8 +78,15 @@ contract SubnetManager is OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUp
             totalWeight += unnormalizedWeights[i];
         }
 
-        for (uint16 i = 0; i < weights.length; i++) {
-            weights[i] = uint16((((unnormalizedWeights[i]) * type(uint16).max) / totalWeight));
+        if (totalWeight == 0) {
+            for (uint16 i = 0; i < weights.length; i++) {
+                weights[i] = 0;
+            }
+        } else {
+            for (uint16 i = 0; i < weights.length; i++) {
+                uint256 normalizedWeight = (unnormalizedWeights[i] * type(uint16).max) / totalWeight;
+                weights[i] = uint16(normalizedWeight);
+            }
         }
 
         return (dests, weights);
@@ -94,7 +101,7 @@ contract SubnetManager is OwnableUpgradeable, UUPSUpgradeable, ReentrancyGuardUp
         dests = new uint16[](uidCount);
         unnormalizedWeights = new uint256[](uidCount);
 
-        for (uint16 uid = 1; uid < uidCount; uid++) {
+        for (uint16 uid = 0; uid < uidCount; uid++) {
             dests[uid] = uid;
             bytes32 hotkey = METAGRAPH_PRECOMPILE.getHotkey(TENEX_NETUID, uid);
             uint256 liquidityProviderCount = liquidityProviderSetLength(hotkey);
