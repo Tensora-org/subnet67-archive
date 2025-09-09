@@ -8,6 +8,7 @@
     "test-getters": "npx hardhat run test/testnet/getters.ts",
     "test-setters": "npx hardhat run test/testnet/setters.ts",
     "test-liquidity": "npx hardhat run test/testnet/liquidity.ts",
+    "test-subnet-manager": "npx hardhat run test/testnet/subnet_manager.ts",
     "build": "npx hardhat compile",
     "deploy:testnet": "npx hardhat deploy:new_proxy --save --network testnet",
     "deploy:mainnet": "npx hardhat deploy:new_proxy --save --network mainnet",
