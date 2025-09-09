@@ -62,7 +62,9 @@ contracts/
 │   ├── LiquidityManager.sol     # LP operations & rewards
 │   ├── FeeManager.sol           # Fee collection & distribution
 │   ├── BuybackManager.sol       # Automated buybacks & vesting
-│   └── LiquidationManager.sol   # Liquidation execution
+│   ├── LiquidationManager.sol   # Liquidation execution
+│   ├── SubnetManager.sol        # Subnet Manager
+│   └── PrecompileAdapter.sol    # Bittensor Precompile Adapter
 ├── interfaces/
 │   ├── IAlpha.sol               # Alpha token interface
 │   ├── IStaking.sol             # Staking precompile
@@ -259,27 +261,51 @@ Eligible Tenex alpha holders receive tier-based fee discounts and higher maximum
 ### Install
 ```bash
 git clone https://github.com/Tenexium/tenex-subnet
-cd tenex-subnet
+cd tenex-subnet/scripts
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ### For Miners (Liquidity Providers)
-No dedicated miner process is required. You can provide or withdraw liquidity directly via the protocol’s liquidity management functions: `addLiquidity()` and `removeLiquidity()`.
-Alternatively, use the CLI (coming soon):
+Use the CLI to associate your hotkey and manage liquidity; no separate miner daemon is required.
+
+Step 1.
+Set up environment variables.
 ```bash
-tenex addliq --address <wallet_address> --amount <tao_amount>
+cp .env.example .env
+```
+Edit `.env` and set `MINER_ETH_PRIVATE_KEY` (EVM private key) and `MINER_HOTKEY` (bytes32 public key of miner hotkey).
+
+Step 2.
+Associate your EVM address with your hotkey.
+```bash
+python3 tenex.py associate --network <network>
 ```
 
+Step 3.
+Add or remove liquidity.
 ```bash
-tenex removeliq --address <wallet_address> --amount <tao_amount>
+python3 tenex.py addliq --amount <amount> --network <network>
 ```
-
->Note: Contracts are currently under audit. Until completion, avoid depositing significant funds.
+```bash
+python3 tenex.py removeliq --amount <amount> --network <network>
+```
+View protocol and miner stats:
+```bash
+python3 tenex.py showstats --network <network>
+```
 
 ### For Validators
->Note: Current validator implementation is temporary; migration to EVM-based validators is planned.
 
+1. Copy `.env.example` to `.env` and edit the following variables:
+   - `VALIDATOR_ETH_PRIVATE_KEY` (your EVM private key)
+   - `NETWORK` (target network, e.g., mainnet / testnet)
+   - `WEIGHT_UPDATE_INTERVAL_BLOCKS` (number of blocks between weight updates)
+
+2. Start the validator process:
 ```bash
-python scripts/validator.py --wallet.name <wallet_name> --wallet.hotkey <hotkey_name> --logging.debug
+python3 validator.py
 ```
 
 ### For Users
