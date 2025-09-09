@@ -1,0 +1,11 @@
+{
+  "network": "mainnet",
+  "deployer": "0x7166F8a1289854c7F1a0AcFBe6Bfb75677Ac6CFD",
+  "timestamp": "2025-09-09T14:25:53.379Z",
+  "tenexiumProtocol": {
+    "proxy": "0x36386252924873a7261e27360475D9f927771B8B",
+    "implementation": "0xF4512fc16660A052Da4fe7bADb937ECeA5778607",
+    "address": "0x36386252924873a7261e27360475D9f927771B8B"
+  },
+  "lastUpdated": "2025-09-09T14:25:53.379Z"
+}
