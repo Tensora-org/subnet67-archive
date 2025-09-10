@@ -16,18 +16,20 @@ class TenexiumValidator:
     def __init__(self):
         """Initializes the Tenexium Validator"""
         self.w3, self.network, self.account, self.weight_update_interval_blocks = TenexUtils.get_signer_for_validator()
-        self.contract = TenexUtils.get_contract("SetWeights", self.w3, self.network, "subnetManager")
+        self.contract = TenexUtils.get_contract("setWeights", self.w3, self.network, "subnetManager")
+        self.contract_hotkey = TenexUtils.h160_to_ss58(self.contract.address)
         self.last_weight_update_block = self.w3.eth.get_block_number()
-        self.hotkey = TenexUtils.h160_to_ss58(self.account.address)
+        self.signer_hotkey = TenexUtils.h160_to_ss58(self.account.address)
         logger.info(f"Initialized Tenexium Validator")
     
     async def run_validator(self):
         """Main validator loop (block-driven)"""
         logger.info("Starting Tenexium Validator (block-driven)...")
         logger.info(f"Network: {self.network}")
-        logger.info(f"Account: {self.account.address}")
+        logger.info(f"Signer: {self.account.address}")
+        logger.info(f"Signer Hotkey: {self.signer_hotkey}")
         logger.info(f"Contract: {self.contract.address}")
-        logger.info(f"Hotkey: {self.hotkey}")
+        logger.info(f"Contract Hotkey: {self.contract_hotkey}")
         balance = self.w3.eth.get_balance(self.account.address)
         balance_tao = self.w3.from_wei(balance, 'ether')
         logger.info(f"Balance: {balance_tao} TAO")
@@ -57,15 +59,13 @@ class TenexiumValidator:
             logger.info(f"Updating weights at block {current_block}")
             nonce = self.w3.eth.get_transaction_count(self.account.address)
             gas_price = self.w3.eth.gas_price
-            logger.info(f"Gas price: {gas_price}")
-            estimated_gas = self.contract.functions.SetWeights().estimate_gas(
-                {
-                    'from': self.account.address,
-                    'value': 0,
-                }
-            )
-            logger.info(f"Estimated gas: {estimated_gas}")
-            transaction = self.contract.functions.SetWeights().build_transaction({
+            estimated_gas = self.contract.functions.setWeights().estimate_gas({
+                'from': self.account.address,
+                'gasPrice': gas_price,
+                'nonce': nonce,
+                'chainId': self.w3.eth.chain_id,
+            })
+            transaction = self.contract.functions.setWeights().build_transaction({
                 'from': self.account.address,
                 'gas': estimated_gas,
                 'gasPrice': gas_price,

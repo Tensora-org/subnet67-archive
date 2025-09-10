@@ -9,14 +9,13 @@ class TenexCLI:
     def __init__(self):
         pass
     
-    def associate(self, network: str):
+    def associate(self):
         """Associate the miner with the protocol"""
         try:
+            w3, network, account, hotkey = TenexUtils.get_signer_for_miner()
+            contract_address = TenexUtils.get_proxy_address(network, "tenexiumProtocol")
+            contract = TenexUtils.get_contract("setAssociate", w3, network, "tenexiumProtocol")
             print(f" Associating {network}...")
-            w3, account, hotkey = TenexUtils.get_signer_for_miner(network)
-            contract_address = TenexUtils.get_proxy_address(network, "subnetManager")
-            contract = TenexUtils.get_contract("setAssociate", w3, network, "subnetManager")
-            
             print(f"📝 Transaction details:")
             print(f"   Network: {network}")
             print(f"   Hotkey: {hotkey}")
@@ -64,16 +63,15 @@ class TenexCLI:
             print(f"❌ Failed to associate: {error}")
             sys.exit(1)
 
-    def add_liquidity(self, amount: str, network: str):
+    def add_liquidity(self, amount: str):
         """Add liquidity to the protocol"""
         try:
-            print(f" Adding {amount} TAO liquidity to {network}...")
-            
-            w3, account, hotkey = TenexUtils.get_signer_for_miner(network)
+            w3, network, account, hotkey = TenexUtils.get_signer_for_miner()
             contract_address = TenexUtils.get_proxy_address(network, "tenexiumProtocol")
             contract = TenexUtils.get_contract("addLiquidity", w3, network, "tenexiumProtocol")
             amount_wei = w3.to_wei(amount, 'ether')
             
+            print(f" Adding {amount} TAO liquidity to {network}...")
             print(f"📝 Transaction details:")
             print(f"   Network: {network}")
             print(f"   Amount: {amount} TAO ({amount_wei} wei)")
@@ -134,16 +132,15 @@ class TenexCLI:
             print(f"❌ Failed to add liquidity: {error}")
             sys.exit(1)
     
-    def remove_liquidity(self, amount: str, network: str):
+    def remove_liquidity(self, amount: str):
         """Remove liquidity from the protocol"""
         try:
-            print(f" Removing {amount} TAO liquidity from {network}...")
-            
-            w3, account, hotkey = TenexUtils.get_signer_for_miner(network)
+            w3, network, account, hotkey = TenexUtils.get_signer_for_miner()
             contract_address = TenexUtils.get_proxy_address(network, "tenexiumProtocol")
             contract = TenexUtils.get_contract("removeLiquidity", w3, network, "tenexiumProtocol")
             amount_wei = w3.to_wei(amount, 'ether')
             
+            print(f" Removing {amount} TAO liquidity from {network}...")
             print(f"📝 Transaction details:")
             print(f"   Network: {network}")
             print(f"   Amount: {amount} TAO ({amount_wei} wei)")
@@ -233,10 +230,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python3 tenex.py associate --network <network>
-  python3 tenex.py addliq --amount <amount> --network <network>
-  python3 tenex.py removeliq --amount <amount> --network <network>
-  python3 tenex.py showstats --network <network>
+  python3 tenex.py associate
+  python3 tenex.py addliq --amount <amount>
+  python3 tenex.py removeliq --amount <amount>
+  python3 tenex.py showstats
         """
     )
     
@@ -264,16 +261,16 @@ Examples:
     cli = TenexCLI()
     
     if args.command == "associate":
-        cli.associate(args.network)
+        cli.associate()
     elif args.command == "addliq":
         validate_amount(args.amount)
-        cli.add_liquidity(args.amount, args.network)
+        cli.add_liquidity(args.amount)
     elif args.command == "removeliq":
         validate_amount(args.amount)
-        cli.remove_liquidity(args.amount, args.network)
+        cli.remove_liquidity(args.amount)
     elif args.command == "showstats":
-        w3, account, hotkey = TenexUtils.get_signer_for_miner(args.network)
-        cli.show_liquidity_stats(account.address, w3, args.network)
+        w3, network, account, hotkey = TenexUtils.get_signer_for_miner()
+        cli.show_liquidity_stats(account.address, w3, network)
 
 if __name__ == "__main__":
     main()
