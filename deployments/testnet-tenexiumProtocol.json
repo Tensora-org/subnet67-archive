@@ -7,18 +7,18 @@
     "implementation": "0x80c1AAC2A51dAf4e275a8cDeD0A21c57049fb02a",
     "address": "0x40325E3A28247cA79207c0C75a878444bF4f7991"
   },
-  "lastUpdated": "2025-09-08T17:41:26.893Z",
+  "lastUpdated": "2025-09-10T10:24:01.874Z",
   "newImplementation": {
-    "address": "0xf22135137F3D802f3932c480997Ed76890dEB04d",
-    "deployedAt": "2025-09-08T17:41:02.175Z",
+    "address": "0x34c7ac320bf0CFB653e85daf288f70917270487D",
+    "deployedAt": "2025-09-10T10:23:37.379Z",
     "deployer": "0xD17863aa942F5e0C611ABE6E1Ba2256147E71e89"
   },
   "upgrades": {
-    "0x12ac163e29d81369589aa0ef01e568838ce824d0a3ab1bdf2190562f5d31feba": {
-      "previousImplementation": "0xD85b1948Ed9F46272D759969d1768814F44f94f0",
-      "newImplementation": "0xf22135137F3D802f3932c480997Ed76890dEB04d",
-      "upgradeTxHash": "0x12ac163e29d81369589aa0ef01e568838ce824d0a3ab1bdf2190562f5d31feba",
-      "upgradedAt": "2025-09-08T17:41:26.893Z",
+    "0xaf2b2d22d80a0cdd614613ce4289f6eda5d26d26dedd2f061bbd2b6f5a3314a6": {
+      "previousImplementation": "0xf22135137F3D802f3932c480997Ed76890dEB04d",
+      "newImplementation": "0x34c7ac320bf0CFB653e85daf288f70917270487D",
+      "upgradeTxHash": "0xaf2b2d22d80a0cdd614613ce4289f6eda5d26d26dedd2f061bbd2b6f5a3314a6",
+      "upgradedAt": "2025-09-10T10:24:01.874Z",
       "upgradedBy": "0xD17863aa942F5e0C611ABE6E1Ba2256147E71e89"
     }
   }
