@@ -115,7 +115,8 @@ task("deploy:new_proxy", "Deploy Tenexium Protocol with upgradeable parameters")
                     deployConfig.tierFeeDiscounts,
                     deployConfig.tierMaxLeverages,
                     deployConfig.protocolValidatorHotkey,
-                    deployConfig.functionPermissions
+                    deployConfig.functionPermissions,
+                    deployConfig.maxLiquidityProvidersPerHotkey
                 ],
                 {
                     initializer: "initialize",
@@ -366,8 +367,7 @@ task("deploy:subnet-manager:new-proxy", "Deploy subnet manager contract")
                 SubnetManager,
                 [
                     TenexiumContractAddress,
-                    deployConfig.versionKey,
-                    deployConfig.MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY
+                    deployConfig.versionKey
                 ],
                 {
                     initializer: "initialize",

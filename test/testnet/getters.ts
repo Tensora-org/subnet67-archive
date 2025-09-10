@@ -20,10 +20,12 @@ async function main() {
         const precision = await TenexiumProtocol.PRECISION();
         const tenexNetuid = await TenexiumProtocol.TENEX_NETUID();
         const version = await TenexiumProtocol.VERSION();
-        
+        const maxLiquidityProvidersPerHotkey = await TenexiumProtocol.maxLiquidityProvidersPerHotkey();
+
         console.log("PRECISION:", precision.toString());
         console.log("TENEX_NETUID:", tenexNetuid.toString());
-        console.log("VERSION:", version);
+        console.log("VERSION:", version.toString());
+        console.log("MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY:", maxLiquidityProvidersPerHotkey.toString());
         
         // Precompile addresses
         const metagraphPrecompile = await TenexiumProtocol.METAGRAPH_PRECOMPILE();

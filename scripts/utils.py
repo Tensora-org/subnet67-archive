@@ -34,9 +34,10 @@ class TenexUtils:
             raise ValueError(f"Unsupported network: {network_name}")
     
     @staticmethod
-    def get_signer_for_miner(network: str) -> tuple[Web3, Account, str]:
+    def get_signer_for_miner() -> tuple[Web3, str, Account, str]:
         """Get Web3 instance and account from MINER_ETH_PRIVATE_KEY"""
         load_dotenv()
+        network = os.getenv("NETWORK", "mainnet")
         private_key = os.getenv("MINER_ETH_PRIVATE_KEY")
         if not private_key:
             raise ValueError("MINER_ETH_PRIVATE_KEY environment variable is required")
@@ -52,13 +53,13 @@ class TenexUtils:
         w3 = TenexUtils.get_web3_instance(network)
         account = Account.from_key(private_key)
         
-        return w3, account, hotkey
+        return w3, network, account, hotkey
 
     @staticmethod
     def get_signer_for_validator() -> tuple[Web3, str, Account, int]:
         """Get Web3 instance and account from VALIDATOR_ETH_PRIVATE_KEY"""
         load_dotenv()
-        network = os.getenv("NETWORK", "testnet")
+        network = os.getenv("NETWORK", "mainnet")
         private_key = os.getenv("VALIDATOR_ETH_PRIVATE_KEY")
         if not private_key:
             raise ValueError("VALIDATOR_ETH_PRIVATE_KEY environment variable is required")
@@ -185,11 +186,11 @@ class TenexUtils:
                     "type": "function",
                 }
             ]
-        elif function_name == "SetWeights":
+        elif function_name == "setWeights":
             return [
                 {
                     "inputs": [],
-                    "name": "SetWeights",
+                    "name": "setWeights",
                     "outputs": [],
                     "stateMutability": "nonpayable",
                     "type": "function",

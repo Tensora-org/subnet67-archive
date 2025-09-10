@@ -73,6 +73,9 @@ interface OriginalValues {
     functionPermissions0: boolean;
     functionPermissions1: boolean;
     functionPermissions2: boolean;
+
+    // Max liquidity providers per hotkey
+    maxLiquidityProvidersPerHotkey: bigint;
 }
 
 async function main() {
@@ -104,7 +107,7 @@ async function main() {
         await testProtocolAddresses(TenexiumProtocol, originalValues);
         await testEmergencyFunctions(TenexiumProtocol, originalValues);
         await testFunctionPermissions(TenexiumProtocol, originalValues);
-
+        await testMaxLiquidityProvidersPerHotkey(TenexiumProtocol, originalValues);
         console.log("\n✅ All setter function tests completed successfully!");
         console.log("🔄 All original states have been restored");
 
@@ -187,6 +190,9 @@ async function getOriginalValues(contract: TenexiumProtocol): Promise<OriginalVa
         functionPermissions0: await contract.functionPermissions(0),
         functionPermissions1: await contract.functionPermissions(1),
         functionPermissions2: await contract.functionPermissions(2),
+
+        // Max liquidity providers per hotkey
+        maxLiquidityProvidersPerHotkey: await contract.maxLiquidityProvidersPerHotkey(),
     };
 }
 
@@ -250,6 +256,9 @@ async function restoreOriginalState(contract: TenexiumProtocol, original: Origin
         await contract.updateFunctionPermissions(
             [original.functionPermissions0, original.functionPermissions1, original.functionPermissions2]
         );
+        
+        // Restore max liquidity providers per hotkey
+        await contract.setMaxLiquidityProvidersPerHotkey(original.maxLiquidityProvidersPerHotkey);
         
         console.log("✅ Original state restored successfully");
     } catch (error) {
@@ -648,6 +657,24 @@ async function testFunctionPermissions(contract: TenexiumProtocol, original: Ori
         [original.functionPermissions0, original.functionPermissions1, original.functionPermissions2]
     );
     console.log("🔄 Function permissions restored to original values");
+}
+
+async function testMaxLiquidityProvidersPerHotkey(contract: TenexiumProtocol, original: OriginalValues) {
+    console.log("\n🧪 Testing setMaxLiquidityProvidersPerHotkey...");
+    
+    const newMaxLiquidityProvidersPerHotkey = 10n;
+    const tx1 = await contract.setMaxLiquidityProvidersPerHotkey(newMaxLiquidityProvidersPerHotkey);
+    await tx1.wait();
+
+    const updatedMaxLiquidityProvidersPerHotkey = await contract.maxLiquidityProvidersPerHotkey();
+    if (updatedMaxLiquidityProvidersPerHotkey !== newMaxLiquidityProvidersPerHotkey) {
+        throw new Error("Max liquidity providers per hotkey update failed");
+    }
+    console.log("✅ setMaxLiquidityProvidersPerHotkey test passed");
+
+    // Restore original max liquidity providers per hotkey
+    await contract.setMaxLiquidityProvidersPerHotkey(original.maxLiquidityProvidersPerHotkey);
+    console.log("🔄 Max liquidity providers per hotkey restored to original value");
 }
 
 main().catch((error) => {

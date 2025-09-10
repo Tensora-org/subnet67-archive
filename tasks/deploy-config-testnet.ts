@@ -47,9 +47,11 @@ export interface DeployConfig {
     // Function permissions (default)
     functionPermissions: boolean[];
 
+    // Max liquidity providers per hotkey
+    maxLiquidityProvidersPerHotkey: string;
+
     // Subnet manager
     versionKey: string;
-    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: string;
 }
 
 const deployConfig: DeployConfig = {
@@ -126,9 +128,11 @@ const deployConfig: DeployConfig = {
     // Function permissions (default)
     functionPermissions: [false, false, false],
 
+    // Max liquidity providers per hotkey
+    maxLiquidityProvidersPerHotkey: "5",
+
     // Subnet manager
-    versionKey: "1",
-    MAX_LIQUIDITY_PROVIDERS_PER_HOTKEY: "5",
+    versionKey: "2",
 };
 
 export default deployConfig; 

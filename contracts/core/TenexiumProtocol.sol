@@ -75,6 +75,7 @@ contract TenexiumProtocol is
      * @param _tierMaxLeverages [tier0..tier5] leverage caps for each tier
      * @param _protocolValidatorHotkey Protocol validator hotkey for staking operations
      * @param _functionPermissions [Open position, Close position, Add collateral]
+     * @param _maxLiquidityProvidersPerHotkey Maximum number of liquidity providers per hotkey
      */
     function initialize(
         uint256 _maxLeverage,
@@ -99,7 +100,8 @@ contract TenexiumProtocol is
         uint256[6] memory _tierFeeDiscounts,
         uint256[6] memory _tierMaxLeverages,
         bytes32 _protocolValidatorHotkey,
-        bool[3] memory _functionPermissions
+        bool[3] memory _functionPermissions,
+        uint256 _maxLiquidityProvidersPerHotkey
     ) public initializer {
         __Pausable_init();
         __Ownable_init(msg.sender);
@@ -183,6 +185,9 @@ contract TenexiumProtocol is
 
         // 11) Function permissions
         functionPermissions = _functionPermissions;
+
+        // 12) Max liquidity providers per hotkey
+        maxLiquidityProvidersPerHotkey = _maxLiquidityProvidersPerHotkey;
     }
 
     // ==================== PROTOCOL UPDATE FUNCTIONS ====================
@@ -698,6 +703,44 @@ contract TenexiumProtocol is
      */
     function _updateLpFeeRewards(address lp) internal override(FeeManager, LiquidityManager) {
         FeeManager._updateLpFeeRewards(lp);
+    }
+
+    // ==================== LIQUIDITY PROVIDER TRACKING FUNCTIONS ====================
+
+    /**
+     * @notice Associate an address with a hotkey
+     * @param hotkey The hotkey to associate the address with
+     * @return true if the address was associated with the hotkey
+     */
+    function setAssociate(bytes32 hotkey) public nonReentrant returns (bool) {
+        if (liquidityProviderSet[hotkey][msg.sender] || uniqueLiquidityProviders[msg.sender]) {
+            revert TenexiumErrors.AddressAlreadyAssociated();
+        }
+        if (groupLiquidityProviders[hotkey].length >= maxLiquidityProvidersPerHotkey) {
+            revert TenexiumErrors.MaxLiquidityProvidersPerHotkeyReached();
+        }
+        uniqueLiquidityProviders[msg.sender] = true;
+        groupLiquidityProviders[hotkey].push(msg.sender);
+        liquidityProviderSet[hotkey][msg.sender] = true;
+        emit AddressAssociated(msg.sender, hotkey, block.timestamp);
+        return true;
+    }
+
+    /**
+     * @notice Set the maximum number of liquidity providers per hotkey
+     * @param _maxLiquidityProvidersPerHotkey The maximum number of liquidity providers per hotkey
+     */
+    function setMaxLiquidityProvidersPerHotkey(uint256 _maxLiquidityProvidersPerHotkey) public onlyOwner {
+        maxLiquidityProvidersPerHotkey = _maxLiquidityProvidersPerHotkey;
+    }
+
+    /**
+     * @notice Get the length of the liquidity provider set for a hotkey
+     * @param hotkey The hotkey to get the length of the liquidity provider set for
+     * @return The length of the liquidity provider set for the hotkey
+     */
+    function liquidityProviderSetLength(bytes32 hotkey) public view returns (uint256) {
+        return groupLiquidityProviders[hotkey].length;
     }
 
     // ==================== UPGRADES (UUPS) ====================

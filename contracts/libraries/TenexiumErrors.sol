@@ -68,4 +68,8 @@ library TenexiumErrors {
 
     // Permission controls
     error FunctionNotPermitted(uint256 permissionIndex);
+
+    // Liquidity provider tracking
+    error AddressAlreadyAssociated();
+    error MaxLiquidityProvidersPerHotkeyReached();
 }
