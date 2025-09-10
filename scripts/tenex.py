@@ -251,9 +251,9 @@ Examples:
     
     parser.add_argument(
         "--network",
-        default="testnet",
+        default="mainnet",
         choices=["testnet", "mainnet"],
-        help="Network to use (default: testnet)"
+        help="Network to use (default: mainnet)"
     )
     
     args = parser.parse_args()
