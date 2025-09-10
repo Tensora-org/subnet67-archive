@@ -27,6 +27,24 @@ const config: HardhatUserConfig = {
     //     ,
     //   },
     // },
+    taostats: {
+      url: "https://evm.taostats.io/api/eth-rpc",  
+    }
+  },
+  etherscan: {
+    apiKey: {
+      taostats: "tenexium",
+    },
+    customChains: [
+      {
+        network: "taostats",
+        chainId: 964,
+        urls: {
+          apiURL: "https://evm.taostats.io/api/api",
+          browserURL: "https://evm.taostats.io"
+        }
+      }
+    ]
   },
   solidity: {
     version: "0.8.28",
