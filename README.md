@@ -349,7 +349,7 @@ function closePosition(
 function addCollateral(uint16 alphaNetuid) external payable
 ```
 
-#### Liquidity Management`
+#### Liquidity Management
 ```solidity
 // Add liquidity
 function addLiquidity() external payable
