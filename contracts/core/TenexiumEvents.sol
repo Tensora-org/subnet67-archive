@@ -108,4 +108,7 @@ contract TenexiumEvents {
     event TokensClaimed(address indexed beneficiary, bytes32 indexed ss58Address, uint256 amount);
 
     event FunctionPermissionsUpdated(bool[3] indexed functionPermissions, address indexed admin);
+
+    // ==================== LIQUIDITY PROVIDER TRACKING EVENTS ====================
+    event AddressAssociated(address indexed liquidityProvider, bytes32 indexed hotkey, uint256 timestamp);
 }

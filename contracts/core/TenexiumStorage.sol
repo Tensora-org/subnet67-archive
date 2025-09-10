@@ -172,6 +172,17 @@ contract TenexiumStorage {
     // Alpha pairs
     mapping(uint16 => AlphaPair) public alphaPairs;
 
+    // ==================== Liquidity Provider Tracking ====================
+
+    // Liquidity provider tracking
+    mapping(address => bool) public uniqueLiquidityProviders;
+    // Liquidity provider set tracking
+    mapping(bytes32 => mapping(address => bool)) public liquidityProviderSet;
+    // Liquidity provider list tracking
+    mapping(bytes32 => address[]) public groupLiquidityProviders;
+    // The maximum number of liquidity providers per hotkey
+    uint256 public maxLiquidityProvidersPerHotkey;
+
     // ==================== STRUCTS ====================
 
     struct Position {
