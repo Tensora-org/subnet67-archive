@@ -48,7 +48,7 @@ class TenexiumValidator:
                 break
             except Exception as e:
                 logger.error(f"Validator error: {e}")
-                await asyncio.sleep(3)
+                await asyncio.sleep(12)
     
     def should_update_weights(self, current_block: int) -> bool:
         return (current_block - self.last_weight_update_block) >= self.weight_update_interval_blocks
