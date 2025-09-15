@@ -271,39 +271,50 @@ pip install -r requirements.txt
 Use the CLI to associate your hotkey and manage liquidity; no separate miner daemon is required.
 
 Step 1.
-Set up environment variables.
+Configure environment variables.
 ```bash
 cp .env.example .env
 ```
-Edit `.env` and set `MINER_ETH_PRIVATE_KEY` (EVM private key) and `MINER_HOTKEY` (bytes32 public key of miner hotkey).
+Edit `.env` and set:
+```bash
+# Private key for the EVM wallet you'll use for TAO deposits
+MINER_ETH_PRIVATE_KEY=your_evm_private_key_here
+
+# Public key (hex) of your registered miner hotkey
+MINER_HOTKEY=your_miner_hotkey_public_key_here
+```
+>Note: To create an EVM wallet and export its private key, see the [EVM mainnet with Metamask wallet guide](https://docs.learnbittensor.org/evm-tutorials/evm-mainnet-with-metamask-wallet).
+
+>Note: To get your miner hotkey public key, enter your hotkey (SS58) address in the [Snow Address Converter App](https://snow-address-converter.netlify.app/) and copy the public key.
 
 Step 2.
 Associate your EVM address with your hotkey.
 ```bash
-python3 tenex.py associate --network <network>
+python3 tenex.py associate
 ```
 
 Step 3.
 Add or remove liquidity.
 ```bash
-python3 tenex.py addliq --amount <amount> --network <network>
+python3 tenex.py addliq --amount <amount>
 ```
 ```bash
-python3 tenex.py removeliq --amount <amount> --network <network>
+python3 tenex.py removeliq --amount <amount>
 ```
 View protocol and miner stats:
 ```bash
-python3 tenex.py showstats --network <network>
+python3 tenex.py showstats
 ```
 
 ### For Validators
 
-1. Copy `.env.example` to `.env` and edit the following variables:
-   - `VALIDATOR_ETH_PRIVATE_KEY` (your EVM private key)
-   - `NETWORK` (target network, e.g., mainnet / testnet)
-   - `WEIGHT_UPDATE_INTERVAL_BLOCKS` (number of blocks between weight updates)
+1. Deploy your validator contract (identical to `SubnetManger`) and register to the subnet with its H160 address.
 
-2. Start the validator process:
+2. Copy `.env.example` to `.env` and edit the following variables:
+   - `VALIDATOR_ETH_PRIVATE_KEY`: private key of your validator contract
+   - `WEIGHT_UPDATE_INTERVAL_BLOCKS`: number of blocks between weight updates
+
+3. Start the validator process:
 ```bash
 python3 validator.py
 ```
@@ -349,7 +360,7 @@ function closePosition(
 function addCollateral(uint16 alphaNetuid) external payable
 ```
 
-#### Liquidity Management`
+#### Liquidity Management
 ```solidity
 // Add liquidity
 function addLiquidity() external payable
