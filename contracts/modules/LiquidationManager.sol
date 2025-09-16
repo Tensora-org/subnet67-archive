@@ -67,13 +67,9 @@ abstract contract LiquidationManager is TenexiumStorage, TenexiumEvents, Precomp
                 (bool success,) = msg.sender.call{value: liquidatorFeeShare}("");
                 if (!success) revert TenexiumErrors.LiquiFeeTransferFailed();
             }
-            // Protocol share of liquidation fees (→ buybacks)
+            // Protocol share of liquidation fees (accounted into protocolFees; buybacks funded via withdrawal)
             uint256 protocolFeeShare = feeToDistribute.safeMul(liquidationFeeProtocolShare) / PRECISION;
             protocolFees = protocolFees.safeAdd(protocolFeeShare);
-            // fund buyback pool with protocol share
-            if (protocolFeeShare > 0) {
-                buybackPool = buybackPool.safeAdd(protocolFeeShare);
-            }
             remaining = remaining.safeSub(feeToDistribute);
         }
 
