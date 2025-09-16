@@ -7,6 +7,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from eth_account import Account
 from web3 import Web3
+import bittensor as bt
 
 class TenexUtils:
     @staticmethod
@@ -56,7 +57,7 @@ class TenexUtils:
         return w3, network, account, hotkey
 
     @staticmethod
-    def get_signer_for_validator() -> tuple[Web3, str, Account, int]:
+    def get_signer_for_evm_validator() -> tuple[Web3, str, Account, int]:
         """Get Web3 instance and account from VALIDATOR_ETH_PRIVATE_KEY"""
         load_dotenv()
         network = os.getenv("NETWORK", "mainnet")
@@ -73,6 +74,25 @@ class TenexUtils:
         weight_update_interval_blocks = int(os.getenv("WEIGHT_UPDATE_INTERVAL_BLOCKS", "100"))
         
         return w3, network, account, weight_update_interval_blocks
+
+    @staticmethod
+    def get_signer_for_normal_validator() -> tuple[Web3, str, bt.wallet, int, str, str, int]:
+        """Get Web3 instance and account from VALIDATOR_ETH_PRIVATE_KEY"""
+        load_dotenv()
+        network = os.getenv("NETWORK", "mainnet")
+        wallet_path = os.getenv("WALLET_PATH", "~/.bittensor/wallets")
+        wallet_name = os.getenv("WALLET_NAME", "tenex")
+        wallet_hotkey = os.getenv("WALLET_HOTKEY", "validators")
+        netuid = os.getenv("NET_UID", "67")
+        endpoint = os.getenv("ENDPOINT", "wss://entrypoint-finney.opentensor.ai:443")
+        logging_level = os.getenv("LOGGING_LEVEL", "info")
+        weight_update_interval_blocks = int(os.getenv("WEIGHT_UPDATE_INTERVAL_BLOCKS", "100"))
+        
+        wallet = bt.wallet(path=wallet_path, name=wallet_name, hotkey=wallet_hotkey)
+
+        w3 = TenexUtils.get_web3_instance(network)
+        
+        return w3, network, wallet, netuid, endpoint, logging_level, weight_update_interval_blocks
 
     @staticmethod
     def get_web3_instance(network: str) -> Web3:
@@ -196,6 +216,37 @@ class TenexUtils:
                     "type": "function",
                 }
             ]
+        elif function_name == "NormalValidationFunctions":
+            return [
+                {
+                    "inputs": [],
+                    "name": "maxLiquidityProvidersPerHotkey",
+                    "outputs": [{"type": "uint256", "name": ""}],
+                    "stateMutability": "view",
+                    "type": "function",
+                },
+                {
+                    "inputs": [{"type": "bytes32", "name": "hotkey"}],
+                    "name": "liquidityProviderSetLength",
+                    "outputs": [{"type": "uint256", "name": ""}],
+                    "stateMutability": "view",
+                    "type": "function",
+                },
+                {
+                    "inputs": [{"type": "bytes32", "name": "hotkey"}, {"type": "uint256", "name": "index"}],
+                    "name": "groupLiquidityProviders",
+                    "outputs": [{"type": "address", "name": ""}],
+                    "stateMutability": "view",
+                    "type": "function",
+                },
+                {
+                    "inputs": [{"type": "address", "name": "liquidityProvider"}],
+                    "name": "liquidityProviders",
+                    "outputs": [{"type": "uint256", "name": "stake"}],
+                    "stateMutability": "view",
+                    "type": "function",
+                }
+            ]
         else:
             raise ValueError(f"Unsupported function: {function_name}")
 
@@ -215,3 +266,7 @@ class TenexUtils:
         prefixed_address = bytes("evm:", "utf-8") + address_bytes
         checksum = hashlib.blake2b(prefixed_address, digest_size=32).digest()
         return scalecodec.ss58_encode(checksum, ss58_format=ss58_format)
+    
+    @staticmethod
+    def ss58_to_bytes32(ss58_address: str) -> bytes:
+        return scalecodec.ss58_decode(ss58_address, ss58_format=42)
