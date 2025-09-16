@@ -83,7 +83,7 @@ class TenexUtils:
         wallet_path = os.getenv("WALLET_PATH", "~/.bittensor/wallets")
         wallet_name = os.getenv("WALLET_NAME", "tenex")
         wallet_hotkey = os.getenv("WALLET_HOTKEY", "validators")
-        netuid = os.getenv("NET_UID", "67")
+        netuid = int(os.getenv("NET_UID", "67"))
         endpoint = os.getenv("ENDPOINT", "wss://entrypoint-finney.opentensor.ai:443")
         logging_level = os.getenv("LOGGING_LEVEL", "info")
         weight_update_interval_blocks = int(os.getenv("WEIGHT_UPDATE_INTERVAL_BLOCKS", "100"))
