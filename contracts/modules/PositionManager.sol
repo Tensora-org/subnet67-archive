@@ -60,8 +60,7 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
 
         // Use simulation to get expected alpha amount with accurate slippage (based on net amount)
         // simSwap expects TAO in RAO; convert wei→rao
-        uint256 expectedAlphaAmount =
-            ALPHA_PRECOMPILE.simSwapTaoForAlpha(alphaNetuid, uint64(taoToStakeNet.weiToRao()));
+        uint256 expectedAlphaAmount = ALPHA_PRECOMPILE.simSwapTaoForAlpha(alphaNetuid, uint64(taoToStakeNet.weiToRao()));
         if (expectedAlphaAmount == 0) revert TenexiumErrors.SwapSimInvalid();
 
         // Calculate minimum acceptable alpha with slippage tolerance
