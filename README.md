@@ -309,7 +309,7 @@ python3 tenex.py showstats
 
 ### For EVM Validators
 
-1. Deploy your validator contract (identical to `SubnetManger`) and register to the subnet with its H160 address.
+1. Deploy your validator contract (identical to `SubnetManager.sol`) and register to the subnet with its H160 address.
 
 2. Copy `.env.example` to `.env` and edit the following variables:
    - `VALIDATOR_ETH_PRIVATE_KEY`: private key of your validator contract
