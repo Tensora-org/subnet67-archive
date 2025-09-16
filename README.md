@@ -279,9 +279,10 @@ Edit `.env` and set:
 ```bash
 # Private key for the EVM wallet you'll use for TAO deposits
 MINER_ETH_PRIVATE_KEY=your_evm_private_key_here
-
 # Public key (hex) of your registered miner hotkey
 MINER_HOTKEY=your_miner_hotkey_public_key_here
+# network name for subtensor EVM (default=mainnet)
+NETWORK=mainnet
 ```
 >Note: To create an EVM wallet and export its private key, see the [EVM mainnet with Metamask wallet guide](https://docs.learnbittensor.org/evm-tutorials/evm-mainnet-with-metamask-wallet).
 
@@ -306,15 +307,32 @@ View protocol and miner stats:
 python3 tenex.py showstats
 ```
 
-### For Validators
+### For EVM Validators
 
 1. Deploy your validator contract (identical to `SubnetManger`) and register to the subnet with its H160 address.
 
 2. Copy `.env.example` to `.env` and edit the following variables:
    - `VALIDATOR_ETH_PRIVATE_KEY`: private key of your validator contract
-   - `WEIGHT_UPDATE_INTERVAL_BLOCKS`: number of blocks between weight updates
+   - `WEIGHT_UPDATE_INTERVAL_BLOCKS`: number of blocks between weight updates (default=`100`)
+   - `NETWORK`: network name for Subtensor EVM (default=`mainnet`)
 
 3. Start the validator process:
+```bash
+python3 evm_validator.py
+```
+
+### For Normal Validators
+
+1. Copy `.env.example` to `.env` and edit the following variables:
+   - `WEIGHT_UPDATE_INTERVAL_BLOCKS`: number of blocks between weight updates (default=`100`)
+   - `NETWORK`: network name for Subtensor EVM (default=`mainnet`)
+   - `NET_UID`: subnet uid (default=`67`)
+   - `ENDPOINT`: subtensor endpoint to which you will connect (default=`wss://entrypoint-finney.opentensor.ai:443`)
+   - `WALLET_PATH`: path where your wallets are stored (default=`~/.bittensor/wallets/`)
+   - `WALLET_NAME`: name of your coldkey (default=`tenex`)
+   - `WALLET_HOTKEY`: name of your hotkey (default=`validators`)
+
+2. Start the validator process:
 ```bash
 python3 validator.py
 ```
