@@ -40,21 +40,36 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
         // Check sufficient liquidity before proceeding
         if (!_checkSufficientLiquidity(borrowedAmount)) revert TenexiumErrors.InsufficientLiquidity();
 
-        // Get total TAO to stake (collateral + borrowed)
-        uint256 totalTaoToStake = collateralAmount + borrowedAmount;
+        // Gross notional and fee withholding before staking
+        uint256 totalTaoToStakeGross = collateralAmount + borrowedAmount;
 
-        // Use simulation to get expected alpha amount with accurate slippage
+        // Calculate and distribute trading fee on gross notional BEFORE staking
+        uint256 tradingFeeAmount = _calculateTradingFee(msg.sender, totalTaoToStakeGross);
+        if (tradingFeeAmount > 0) {
+            _distributeTradingFees(tradingFeeAmount);
+            // Accumulate protocol's share of trading fees in protocolFees
+            uint256 protocolShare = tradingFeeAmount.safeMul(tradingFeeProtocolShare) / PRECISION;
+            if (protocolShare > 0) {
+                protocolFees += protocolShare;
+            }
+        }
+
+        // Net TAO to stake after fee withholding
+        uint256 taoToStakeNet = totalTaoToStakeGross.safeSub(tradingFeeAmount);
+        if (taoToStakeNet == 0) revert TenexiumErrors.AmountZero();
+
+        // Use simulation to get expected alpha amount with accurate slippage (based on net amount)
         // simSwap expects TAO in RAO; convert wei→rao
         uint256 expectedAlphaAmount =
-            ALPHA_PRECOMPILE.simSwapTaoForAlpha(alphaNetuid, uint64(totalTaoToStake.weiToRao()));
+            ALPHA_PRECOMPILE.simSwapTaoForAlpha(alphaNetuid, uint64(taoToStakeNet.weiToRao()));
         if (expectedAlphaAmount == 0) revert TenexiumErrors.SwapSimInvalid();
 
         // Calculate minimum acceptable alpha with slippage tolerance
         uint256 minAcceptableAlpha = expectedAlphaAmount.safeMul(10000 - maxSlippage) / 10000;
 
-        // Execute stake operation
+        // Execute stake operation using net TAO
         bytes32 validatorHotkey = _getAlphaValidatorHotkey(alphaNetuid);
-        uint256 actualAlphaReceived = _stakeTaoForAlpha(validatorHotkey, totalTaoToStake, alphaNetuid);
+        uint256 actualAlphaReceived = _stakeTaoForAlpha(validatorHotkey, taoToStakeNet, alphaNetuid);
 
         // Verify slippage tolerance
         if (actualAlphaReceived < minAcceptableAlpha) revert TenexiumErrors.SlippageTooHigh();
@@ -62,19 +77,6 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
         // Get current alpha price for entry tracking
         // Price is returned in RAO/alpha; convert to wei/alpha for internal consistency
         uint256 entryPrice = ALPHA_PRECOMPILE.getAlphaPrice(alphaNetuid).priceRaoToWei();
-
-        // Calculate and distribute trading fee on notional (collateral + borrow)
-        {
-            uint256 tradingFeeAmount = _calculateTradingFee(msg.sender, totalTaoToStake);
-            if (tradingFeeAmount > 0) {
-                _distributeTradingFees(tradingFeeAmount);
-                // Accumulate protocol's share of trading fees in protocolFees
-                uint256 protocolShare = tradingFeeAmount.safeMul(tradingFeeProtocolShare) / PRECISION;
-                if (protocolShare > 0) {
-                    protocolFees += protocolShare;
-                }
-            }
-        }
 
         // Create position
         Position storage position = positions[msg.sender][alphaNetuid];
@@ -99,9 +101,9 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
         pair.totalBorrowed += borrowedAmount;
 
         // Update metrics
-        totalVolume += totalTaoToStake;
+        totalVolume += totalTaoToStakeGross;
         totalTrades += 1;
-        userTotalVolume[msg.sender] += totalTaoToStake;
+        userTotalVolume[msg.sender] += totalTaoToStakeGross;
 
         emit PositionOpened(
             msg.sender, alphaNetuid, collateralAmount, borrowedAmount, actualAlphaReceived, leverage, entryPrice
