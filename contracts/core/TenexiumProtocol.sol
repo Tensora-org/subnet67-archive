@@ -531,7 +531,9 @@ contract TenexiumProtocol is
         external
         payable
         whenNotPaused
+        nonReentrant
         userRateLimit
+        validAlphaPair(alphaNetuid)
         hasPermission(0)
     {
         _openPosition(alphaNetuid, leverage, maxSlippage);
@@ -549,6 +551,7 @@ contract TenexiumProtocol is
         nonReentrant
         userRateLimit
         validPosition(msg.sender, alphaNetuid)
+        validAlphaPair(alphaNetuid)
         hasPermission(1)
     {
         _closePosition(alphaNetuid, amountToClose, maxSlippage);
@@ -562,8 +565,10 @@ contract TenexiumProtocol is
     function addCollateral(uint16 alphaNetuid)
         external
         payable
+        nonReentrant
         userRateLimit
         validPosition(msg.sender, alphaNetuid)
+        validAlphaPair(alphaNetuid)
         hasPermission(2)
     {
         _addCollateral(alphaNetuid);
