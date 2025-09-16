@@ -531,6 +531,7 @@ contract TenexiumProtocol is
         external
         payable
         whenNotPaused
+        nonReentrant
         userRateLimit
         validAlphaPair(alphaNetuid)
         hasPermission(0)
@@ -564,6 +565,7 @@ contract TenexiumProtocol is
     function addCollateral(uint16 alphaNetuid)
         external
         payable
+        nonReentrant
         userRateLimit
         validPosition(msg.sender, alphaNetuid)
         validAlphaPair(alphaNetuid)
