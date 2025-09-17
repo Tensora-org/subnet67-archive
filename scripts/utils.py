@@ -242,7 +242,37 @@ class TenexUtils:
                 {
                     "inputs": [{"type": "address", "name": "liquidityProvider"}],
                     "name": "liquidityProviders",
-                    "outputs": [{"type": "uint256", "name": "stake"}],
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "stake",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "rewards",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "lastRewardBlock",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "shares",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "rewardDebt",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "bool",
+                            "name": "isActive",
+                            "type": "bool"
+                        }],
                     "stateMutability": "view",
                     "type": "function",
                 }
@@ -268,5 +298,17 @@ class TenexUtils:
         return scalecodec.ss58_encode(checksum, ss58_format=ss58_format)
     
     @staticmethod
-    def ss58_to_bytes32(ss58_address: str) -> bytes:
-        return scalecodec.ss58_decode(ss58_address, ss58_format=42)
+    def ss58_to_bytes(ss58_address: str, valid_ss58_format: int | None = 42) -> bytes:
+        pubkey = scalecodec.ss58_decode(ss58_address, valid_ss58_format=valid_ss58_format)
+        if isinstance(pubkey, str):
+            if pubkey.startswith("0x"):
+                pubkey = pubkey[2:]
+            pubkey_bytes = bytes.fromhex(pubkey)
+        elif isinstance(pubkey, (bytes, bytearray)):
+            pubkey_bytes = bytes(pubkey)
+        else:
+            raise TypeError(f"Unexpected type from ss58_decode: {type(pubkey)}")
+
+        if len(pubkey_bytes) != 32:
+            raise ValueError(f"Decoded key is {len(pubkey_bytes)} bytes, expected 32")
+        return pubkey_bytes
