@@ -95,7 +95,6 @@ class TenexiumValidator:
         uint_uids, uint_weights = self.prepare_weights()
         bt.logging.debug(f"commit_reveal_weights_enabled : {commit_reveal_weights_enabled}")
         bt.logging.debug(f"Weights: {uint_weights}")
-        bt.logging.debug(f"Uids: {uint_uids}")
         result, msg = self.subtensor.set_weights(
             wallet=self.wallet,
             netuid=self.netuid,
@@ -105,7 +104,7 @@ class TenexiumValidator:
             wait_for_finalization=False,
             version_key=version_key,
         )
-        return result
+        return result, msg
     
     def prepare_weights(self):
         """
@@ -115,10 +114,8 @@ class TenexiumValidator:
         U16_MAX = 65535
         uint_uids, uint_weights = self.get_unnormalized_weights()
         bt.logging.debug(f"Unnormalized weights: {uint_weights}")
-        bt.logging.debug(f"Unnormalized uids: {uint_uids}")
 
         total_weight = sum(uint_weights)
-        bt.logging.debug(f"Total weight: {total_weight}")
         
         if total_weight == 0:
             uint_weights[0] = U16_MAX
