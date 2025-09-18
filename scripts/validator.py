@@ -54,6 +54,7 @@ class TenexiumValidator:
                 current_block = self.subtensor.get_current_block()
 
                 if self.should_update_weights(current_block):
+                    self.metagraph = self.subtensor.metagraph(self.netuid)
                     self.update_weights(current_block)
                 time.sleep(12)
                 
