@@ -63,7 +63,6 @@ class TenexiumValidator:
                 break
             except Exception as e:
                 bt.logging.error(f"Validator error: {e}")
-                time.sleep(12)
     
     def should_update_weights(self, current_block: int) -> bool:
         bt.logging.info(f"Current block: {current_block}")
@@ -134,26 +133,59 @@ class TenexiumValidator:
         max_liquidity_providers_per_hotkey = self.tenexium_contract.functions.maxLiquidityProvidersPerHotkey().call()
         bt.logging.debug(f"Max liquidity providers per hotkey: {max_liquidity_providers_per_hotkey}")
         uint_weights = [0] * len(uint_uids)
+
+        def _call_with_retries(callable_fn, error_msg_prefix, max_retries, *args, **kwargs):
+            for attempt in range(max_retries):
+                try:
+                    return callable_fn(*args, **kwargs)
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        bt.logging.warning(f"{error_msg_prefix} Retry {attempt+1}/{max_retries}: {e}")
+                        time.sleep(20 * (attempt + 1))
+                    else:
+                        bt.logging.error(f"{error_msg_prefix} after {max_retries} attempts: {e}")
+            return None
+
         for uid in uint_uids:
             if uid == 0:
                 continue
             hotkey_ss58_address = self.metagraph.hotkeys[uid]
             bt.logging.info(f"Computing weight for uid {uid} (hotkey {hotkey_ss58_address})")
             hotkey_bytes32 = TenexUtils.ss58_to_bytes(hotkey_ss58_address)
-            liquidity_provider_count = self.tenexium_contract.functions.liquidityProviderSetLength(hotkey_bytes32).call()
-            if liquidity_provider_count > max_liquidity_providers_per_hotkey:
-                max_liquidity_providers = max_liquidity_providers_per_hotkey
-            else:
-                max_liquidity_providers = liquidity_provider_count
+            max_retries = 10
+            # Get liquidity provider count with retries
+            liquidity_provider_count = None
+            
+            liquidity_provider_count = _call_with_retries(
+                lambda: self.tenexium_contract.functions.liquidityProviderSetLength(hotkey_bytes32).call(),
+                f"getting liquidity provider count for uid {uid} (hotkey {hotkey_ss58_address})",
+                max_retries
+            )
+            if liquidity_provider_count is None:
+                continue
+
+            max_liquidity_providers = min(liquidity_provider_count, max_liquidity_providers_per_hotkey)
             for i in range(max_liquidity_providers):
-                liquidity_provider = self.tenexium_contract.functions.groupLiquidityProviders(hotkey_bytes32, i).call()
-                liquidity_provider_balance = self.tenexium_contract.functions.liquidityProviders(liquidity_provider).call()[0]
+                liquidity_provider = _call_with_retries(
+                    lambda: self.tenexium_contract.functions.groupLiquidityProviders(hotkey_bytes32, i).call(),
+                    f"getting liquidity provider for uid {uid} (hotkey {hotkey_ss58_address})",
+                    max_retries
+                )
+                if liquidity_provider is None:
+                    continue
+
+                liquidity_provider_balance = _call_with_retries(
+                    lambda: self.tenexium_contract.functions.liquidityProviders(liquidity_provider).call()[0],
+                    f"getting liquidity provider balance for uid {uid} (hotkey {hotkey_ss58_address})",
+                    max_retries
+                )
+                if liquidity_provider_balance is None:
+                    continue
                 bt.logging.debug(f"Liquidity provider balance: {liquidity_provider_balance / 10**18}τ")
                 uint_weights[uid] += liquidity_provider_balance
-                time.sleep(2)
             bt.logging.info(f"Derived weight for uid {uid} (hotkey {hotkey_ss58_address})")
             bt.logging.debug(f"Weight for uid {uid}: {uint_weights[uid]}")
-            time.sleep(10)
+            time.sleep(5)
         return uint_uids, uint_weights
 
 
