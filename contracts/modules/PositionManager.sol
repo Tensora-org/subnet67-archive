@@ -116,6 +116,7 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
      * @param maxSlippage Maximum acceptable slippage (in basis points)
      */
     function _closePosition(uint16 alphaNetuid, uint256 amountToClose, uint256 maxSlippage) internal {
+        if (maxSlippage > 1000) revert TenexiumErrors.SlippageTooHigh();
         Position storage position = positions[msg.sender][alphaNetuid];
 
         // Calculate accrued borrowing fees
