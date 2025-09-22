@@ -23,7 +23,7 @@ abstract contract FeeManager is TenexiumStorage, TenexiumEvents {
      * @param feeAmount Total trading fee amount to distribute
      */
     function _distributeTradingFees(uint256 feeAmount) internal {
-        if (feeAmount == 0) revert TenexiumErrors.NoFees();
+        if (feeAmount == 0) return;
 
         // Calculate distribution amounts using trading fee shares
         uint256 lpFeeAmount = feeAmount.safeMul(tradingFeeLpShare) / PRECISION;
@@ -54,7 +54,7 @@ abstract contract FeeManager is TenexiumStorage, TenexiumEvents {
      * @param feeAmount Total borrowing fee amount to distribute
      */
     function _distributeBorrowingFees(uint256 feeAmount) internal {
-        if (feeAmount == 0) revert TenexiumErrors.NoFees();
+        if (feeAmount == 0) return;
 
         uint256 lpFeeAmount = feeAmount.safeMul(borrowingFeeLpShare) / PRECISION;
         uint256 liquidatorFeeAmount = feeAmount.safeMul(borrowingFeeLiquidatorShare) / PRECISION;
