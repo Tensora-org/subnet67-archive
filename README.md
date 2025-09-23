@@ -403,8 +403,7 @@ function getProtocolStats() external view returns (
     uint256 totalVolumeAmount,
     uint256 totalTradesCount,
     uint256 protocolFeesAmount,
-    uint256 totalLpStakesAmount,
-    uint256 activePairsCount
+    uint256 totalLpStakesAmount
 )
 
 // Get user statistics
@@ -415,21 +414,6 @@ function getUserStats(address user) external view returns (
     bool isLiquidityProvider
 )
 
-// Get user position
-function getUserPosition(address user, uint16 alphaNetuid) external view returns (Position memory position)
-
-// Get LP information
-function getLpInfo(address lpAddress) external view returns (
-    uint256 stake,
-    uint256 shares,
-    uint256 sharePercentage
-)
-
-// Get liquidity statistics
-function getLiquidityStats() external view returns (
-    uint256 totalFees,
-    uint256 totalStakes
-)
 ```
 
 ---

@@ -33,6 +33,10 @@ abstract contract LiquidationManager is TenexiumStorage, TenexiumEvents, Precomp
         if (!position.isActive) revert TenexiumErrors.PositionInactive();
         if (position.alphaAmount == 0) revert TenexiumErrors.NoAlpha();
 
+        // Sanity checks for optional metadata
+        if (bytes(justificationUrl).length > 512) revert TenexiumErrors.InvalidValue();
+        if (contentHash == bytes32(0)) revert TenexiumErrors.InvalidValue();
+
         // Verify liquidation is justified using single threshold
         if (!_isPositionLiquidatable(user, alphaNetuid)) revert TenexiumErrors.NotLiquidatable();
 

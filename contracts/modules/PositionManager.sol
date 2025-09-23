@@ -99,6 +99,17 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
         pair.totalCollateral += collateralAmount;
         pair.totalBorrowed += borrowedAmount;
 
+        // Update utilization and borrowing rate for the pair and emit event
+        if (pair.totalCollateral == 0) {
+            pair.utilizationRate = 0;
+            pair.borrowingRate = 0;
+        } else {
+            uint256 utilization = pair.totalBorrowed.safeMul(PRECISION) / pair.totalCollateral;
+            pair.utilizationRate = utilization;
+            pair.borrowingRate = RiskCalculator.dynamicBorrowRatePer360(utilization);
+        }
+        emit UtilizationRateUpdated(alphaNetuid, pair.utilizationRate, pair.borrowingRate);
+
         // Update metrics
         totalVolume += totalTaoToStakeGross;
         totalTrades += 1;
@@ -116,6 +127,7 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
      * @param maxSlippage Maximum acceptable slippage (in basis points)
      */
     function _closePosition(uint16 alphaNetuid, uint256 amountToClose, uint256 maxSlippage) internal {
+        if (maxSlippage > 1000) revert TenexiumErrors.SlippageTooHigh();
         Position storage position = positions[msg.sender][alphaNetuid];
 
         // Calculate accrued borrowing fees
@@ -179,6 +191,17 @@ abstract contract PositionManager is FeeManager, PrecompileAdapter {
         AlphaPair storage pair = alphaPairs[alphaNetuid];
         pair.totalBorrowed -= borrowedToRepay;
         pair.totalCollateral -= collateralToReturn;
+
+        // Update utilization and borrowing rate for the pair and emit event
+        if (pair.totalCollateral == 0) {
+            pair.utilizationRate = 0;
+            pair.borrowingRate = 0;
+        } else {
+            uint256 utilization2 = pair.totalBorrowed.safeMul(PRECISION) / pair.totalCollateral;
+            pair.utilizationRate = utilization2;
+            pair.borrowingRate = RiskCalculator.dynamicBorrowRatePer360(utilization2);
+        }
+        emit UtilizationRateUpdated(alphaNetuid, pair.utilizationRate, pair.borrowingRate);
 
         // Distribute fees
         _distributeTradingFees(tradingFeeAmount);
