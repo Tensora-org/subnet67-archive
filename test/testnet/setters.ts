@@ -80,7 +80,8 @@ interface OriginalValues {
 
 async function main() {
     const networkName = process.env.NETWORK_NAME || "mainnet";
-    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract(networkName);
+    const prKey = process.env.ETH_PRIVATE_KEY || "";
+    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract(networkName, prKey);
     const TenexiumProtocolContractAddress = TenexiumProtocol.target;
 
     console.log("🚀 Starting TenexiumProtocol Setter Function Tests on " + networkName);

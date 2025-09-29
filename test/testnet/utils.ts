@@ -9,7 +9,6 @@ interface ContractSetupForTenexium {
     provider: any;
     signer: any;
     contract: TenexiumProtocol;
-    user: any;
 }
 
 interface ContractSetupForSubnetManager {
@@ -39,18 +38,16 @@ const utils = {
             throw new Error(`Unsupported network: ${networkName}`);
         }
     },
-    async getTenexiumProtocolContract(networkName: string): Promise<ContractSetupForTenexium> {
+    async getTenexiumProtocolContract(networkName: string, prKey: string): Promise<ContractSetupForTenexium> {
         const provider = new ethers.JsonRpcProvider(this.getRpcUrl(networkName));
-        const signer = new ethers.Wallet(process.env.ETH_PRIVATE_KEY!, provider);
-        const user = new ethers.Wallet(process.env.USER_PRIVATE_KEY!, provider);
+        const signer = new ethers.Wallet(prKey, provider);
         const contractAddress = this.getProxyAddress(networkName, "tenexiumProtocol");
         const contract = await ethers.getContractAt("TenexiumProtocol", contractAddress, signer) as any as TenexiumProtocol;
         
         return {
             provider,
             signer,
-            contract,
-            user
+            contract
         };
     },
     async getSubnetManagerContract(networkName: string): Promise<ContractSetupForSubnetManager> {
