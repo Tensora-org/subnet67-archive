@@ -1,3 +1,4 @@
+import "hardhat-storage-layout"
 import "./tasks/deploy-final";
 
 import "@nomicfoundation/hardhat-toolbox";
@@ -9,15 +10,15 @@ import {HardhatUserConfig} from "hardhat/config";
 const config: HardhatUserConfig = {
   networks: {
     mainnet: {
-      url: "https://lite.chain.opentensor.ai",
+      url: process.env.MAINNET_RPC_URL || "https://lite.chain.opentensor.ai",
       accounts: process.env.ETH_PRIVATE_KEY ? [process.env.ETH_PRIVATE_KEY] : []
     },
     testnet: {
-      url: "https://test.chain.opentensor.ai",
+      url: process.env.TESTNET_RPC_URL || "https://test.chain.opentensor.ai",
       accounts: process.env.ETH_PRIVATE_KEY ? [process.env.ETH_PRIVATE_KEY] : []
     },
     local: {
-      url: "http://127.0.0.1:9944",
+      url: process.env.LOCAL_RPC_URL || "http://127.0.0.1:8545",
       accounts: process.env.ETH_PRIVATE_KEY ? [process.env.ETH_PRIVATE_KEY] : []
     },
     // hardhat: {

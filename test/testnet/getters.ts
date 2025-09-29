@@ -2,13 +2,14 @@ import { ethers } from "hardhat";
 import utils from "./utils";
 
 async function main() {
-    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract("testnet");
+    const networkName = process.env.NETWORK_NAME || "mainnet";
+    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract(networkName);
     const TenexiumProtocolContractAddress = TenexiumProtocol.target;
     
-    console.log("🔍 Testing TenexiumProtocol Getters on Testnet");
+    console.log("🔍 Testing TenexiumProtocol Getters on " + networkName);
     console.log("=" .repeat(60));
     console.log("TenexiumProtocolContractAddress:", TenexiumProtocolContractAddress);
-    console.log("RPC URL:", utils.getRpcUrl("testnet"));
+    console.log("RPC URL:", utils.getRpcUrl(networkName));
     console.log("Signer:", signer.address);
     console.log("Contract Balance:", ethers.formatEther(await provider.getBalance(TenexiumProtocolContractAddress)), "TAO");
     

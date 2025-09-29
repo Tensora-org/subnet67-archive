@@ -29,10 +29,12 @@ const utils = {
         return existingData.tenexiumProtocol.proxy || "";
     },
     getRpcUrl(networkName: string): string {
-        if (networkName === "testnet") {
-            return "https://test.chain.opentensor.ai";
-        } else if (networkName === "mainnet") {
-            return "https://lite.chain.opentensor.ai";
+        if (networkName === "mainnet") {
+            return process.env.MAINNET_RPC_URL || "https://lite.chain.opentensor.ai";
+        } else if (networkName === "testnet") {
+            return process.env.TESTNET_RPC_URL || "https://test.chain.opentensor.ai";
+        } else if (networkName === "local") {
+            return process.env.LOCAL_RPC_URL || "http://127.0.0.1:8545";
         } else {
             throw new Error(`Unsupported network: ${networkName}`);
         }
