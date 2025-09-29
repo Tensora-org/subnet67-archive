@@ -50,6 +50,7 @@
     "hardhat": "^2.26.3",
     "hardhat-contract-sizer": "^2.10.1",
     "hardhat-gas-reporter": "^2.3.0",
+    "hardhat-storage-layout": "^0.1.7",
     "install": "^0.13.0",
     "npm": "^11.5.2",
     "solidity-coverage": "^0.8.1",
