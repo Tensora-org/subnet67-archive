@@ -343,7 +343,7 @@ task("upgrade:proxy", "Upgrade proxy contract to new implementation")
 
 
 // Task: Deploy subnet manager
-task("deploy:subnet-manager:new-proxy", "Deploy subnet manager contract")
+task("deploy:subnet-manager:new_proxy", "Deploy subnet manager contract")
     .addFlag("save", "Save deployment info to file")
     .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
         console.log("🚀 Deploying Subnet Manager Contract...");
@@ -555,6 +555,82 @@ task("upgrade:subnet-manager:proxy", "Upgrade subnet manager proxy to new implem
         }
     });
 
+// Task: Deploy address conversion contract
+task("deploy:address-conversion", "Deploy address conversion contract")
+    .addFlag("save", "Save deployment info to file")
+    .addOptionalParam("gas", "Gas limit to use for deployment (bypass estimate)", undefined, types.int)
+    .addOptionalParam("gasPrice", "Legacy gasPrice in wei (overrides auto)", undefined, types.string)
+    .addFlag("legacyTx", "Use legacy transactions with gasPrice instead of EIP-1559 fees")
+    .setAction(async (taskArgs, hre: HardhatRuntimeEnvironment) => {
+        console.log("🚀 Deploying Address Conversion Contract...");
+        console.log("=============================================");
+
+        const networkName = hre.network.name;
+        const shouldSave = taskArgs.save;
+        try {
+            // Get deployer
+            const [deployer] = await hre.ethers.getSigners();
+
+            console.log(`  Deployer: ${deployer.address}`);
+            console.log(`  Deployer balance: ${hre.ethers.formatEther(await deployer.provider.getBalance(deployer.address))} ETH`);
+
+            // Deploy address conversion contract (bypass gas estimation on Frontier-style RPCs)
+            console.log("\n�� Deploying Address Conversion Contract...");
+            const AddressConversion = await hre.ethers.getContractFactory("AddressConversion");
+
+            // Prepare fee overrides to avoid eth_estimateGas traps on Substrate EVM
+            const defaultGasLimit = 10_000_000n; // safe high limit for deployment
+            const gasLimit: bigint = taskArgs.gas ? BigInt(taskArgs.gas) : defaultGasLimit;
+
+            const feeData = await deployer.provider.getFeeData();
+            const useLegacy: boolean = Boolean(taskArgs.legacyTx) || (feeData.maxFeePerGas == null);
+
+            let overrides: any = { gasLimit };
+            if (useLegacy) {
+                const gasPrice = taskArgs.gasPrice ? BigInt(taskArgs.gasPrice) : (feeData.gasPrice ?? 1_000_000_000n); // 1 gwei fallback
+                overrides.gasPrice = gasPrice;
+                console.log(`  Using legacy tx with gasPrice=${gasPrice.toString()} and gasLimit=${gasLimit}`);
+            } else {
+                // Fallback to EIP-1559 if supported by the RPC
+                overrides.maxFeePerGas = feeData.maxFeePerGas;
+                overrides.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas ?? feeData.maxFeePerGas;
+                console.log(`  Using EIP-1559 with maxFeePerGas=${overrides.maxFeePerGas}, maxPriorityFeePerGas=${overrides.maxPriorityFeePerGas}, gasLimit=${gasLimit}`);
+            }
+
+            const addressConversion = await AddressConversion.deploy(overrides);
+            await addressConversion.waitForDeployment();
+            const implementationAddress = await addressConversion.getAddress();
+
+            // Save implementation address if requested
+            if (shouldSave) {
+                const deploymentsDir = path.join(__dirname, "..", "deployments");
+                if (!fs.existsSync(deploymentsDir)) {
+                    fs.mkdirSync(deploymentsDir, { recursive: true });
+                }
+                const filePath = path.join(deploymentsDir, `${networkName}-${"addressConversion"}.json`); 
+                const updatedData = {
+                    lastUpdated: new Date().toISOString(),
+                    addressConversion: {
+                        address: implementationAddress,
+                        deployedAt: new Date().toISOString(),
+                        deployer: deployer.address
+                    }
+                };
+                fs.writeFileSync(filePath, JSON.stringify(updatedData, null, 2));
+                console.log(`  📁 Address conversion address saved to ${filePath}`);
+            }
+
+            console.log("\n🎉 Address conversion deployment completed successfully!");
+            console.log(`  📋 Address conversion address: ${implementationAddress}`);
+            console.log("\n💡 Next steps:");
+            console.log("  1. Verify the address conversion contract");
+        } catch (error: any) {
+            console.error("\n❌ Address conversion deployment failed:");
+            console.error(error.message);
+            process.exit(1);
+        }
+    });
+
 // Task: Show deployment help
 task("deploy:help", "Show deployment task help")
     .setAction(async () => {
@@ -563,7 +639,7 @@ task("deploy:help", "Show deployment task help")
         console.log("");
         console.log("Available tasks:");
         console.log("");
-        console.log("  npx hardhat deploy:new [options]");
+        console.log("  npx hardhat deploy:new_proxy [options]");
         console.log("    Deploy new upgradeable version of the contract");
         console.log("");
         console.log("  npx hardhat deploy:implementation [options]");
@@ -581,7 +657,7 @@ task("deploy:help", "Show deployment task help")
         console.log("  --data <hex>         Initialization data (optional)");
         console.log("");
         console.log("Examples:");
-        console.log("  npx hardhat deploy:new-proxy --save");
+        console.log("  npx hardhat deploy:new_proxy --save");
         console.log("  npx hardhat deploy:implementation --save");
         console.log("  npx hardhat upgrade:proxy --proxy 0x123... --implementation 0x456... --save");
     }); 
