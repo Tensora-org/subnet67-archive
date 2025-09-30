@@ -37,7 +37,4 @@ jobs:
 
       - name: Run lint
         run: forge lint
-
-      - name: Run build
-        run: forge clean && forge build
-        
+           
