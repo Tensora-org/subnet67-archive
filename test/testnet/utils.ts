@@ -9,7 +9,6 @@ interface ContractSetupForTenexium {
     provider: any;
     signer: any;
     contract: TenexiumProtocol;
-    user: any;
 }
 
 interface ContractSetupForSubnetManager {
@@ -29,26 +28,26 @@ const utils = {
         return existingData.tenexiumProtocol.proxy || "";
     },
     getRpcUrl(networkName: string): string {
-        if (networkName === "testnet") {
-            return "https://test.chain.opentensor.ai";
-        } else if (networkName === "mainnet") {
-            return "https://lite.chain.opentensor.ai";
+        if (networkName === "mainnet") {
+            return process.env.MAINNET_RPC_URL || "https://lite.chain.opentensor.ai";
+        } else if (networkName === "testnet") {
+            return process.env.TESTNET_RPC_URL || "https://test.chain.opentensor.ai";
+        } else if (networkName === "local") {
+            return process.env.LOCAL_RPC_URL || "http://127.0.0.1:8545";
         } else {
             throw new Error(`Unsupported network: ${networkName}`);
         }
     },
-    async getTenexiumProtocolContract(networkName: string): Promise<ContractSetupForTenexium> {
+    async getTenexiumProtocolContract(networkName: string, prKey: string): Promise<ContractSetupForTenexium> {
         const provider = new ethers.JsonRpcProvider(this.getRpcUrl(networkName));
-        const signer = new ethers.Wallet(process.env.ETH_PRIVATE_KEY!, provider);
-        const user = new ethers.Wallet(process.env.USER_PRIVATE_KEY!, provider);
+        const signer = new ethers.Wallet(prKey, provider);
         const contractAddress = this.getProxyAddress(networkName, "tenexiumProtocol");
         const contract = await ethers.getContractAt("TenexiumProtocol", contractAddress, signer) as any as TenexiumProtocol;
         
         return {
             provider,
             signer,
-            contract,
-            user
+            contract
         };
     },
     async getSubnetManagerContract(networkName: string): Promise<ContractSetupForSubnetManager> {

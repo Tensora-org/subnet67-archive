@@ -2,15 +2,17 @@ import { ethers } from "hardhat";
 import utils from "./utils";
 
 async function main() {
-    // Connect to the Subtensor EVM testnet
-    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract("testnet");
+    const networkName = process.env.NETWORK_NAME || "mainnet";
+    const prKey = process.env.USER_PRIVATE_KEY || "";
+    const { provider, signer, contract: TenexiumProtocol } = await utils.getTenexiumProtocolContract(networkName, prKey);
     const TenexiumProtocolContractAddress = TenexiumProtocol.target;
 
-    console.log("🔍 Testing TenexiumProtocol Liquidity on Testnet");
+    console.log("🔍 Testing TenexiumProtocol Liquidity on " + networkName);
     console.log("=" .repeat(60));
     console.log("TenexiumProtocolContractAddress:", TenexiumProtocolContractAddress);
-    console.log("RPC URL:", utils.getRpcUrl("testnet"));
-    console.log("Signer:", signer.address);
+    console.log("RPC URL:", utils.getRpcUrl(networkName));
+    console.log("User:", signer.address);
+    console.log("User balance:", ethers.formatEther(await provider.getBalance(signer.address)), "TAO");
     console.log("Contract Balance:", ethers.formatEther(await provider.getBalance(TenexiumProtocolContractAddress)), "TAO");
     
     const userAddress = await signer.getAddress();
@@ -38,8 +40,8 @@ async function main() {
     console.log(`\n💾 Original Stake Amount: ${ethers.formatEther(originalStake)} TAO`);
     
     // Test amounts
-    const testAmountForAdding = ethers.parseEther("1"); // 1 TAO for adding liquidity
-    const testAmountForRemoving = ethers.parseEther("1"); // 5 TAO for removing liquidity
+    const testAmountForAdding = ethers.parseEther("0.1"); // 0.1 TAO for adding liquidity
+    const testAmountForRemoving = ethers.parseEther("0.1"); // 0.1 TAO for removing liquidity
     console.log(`\n🧪 Test Amount for Adding: ${ethers.formatEther(testAmountForAdding)} TAO`);
     console.log(`🧪 Test Amount for Removing: ${ethers.formatEther(testAmountForRemoving)} TAO`);
     console.log(`minLiquidityThreshold: ${ethers.formatEther(await TenexiumProtocol.minLiquidityThreshold())} TAO`);
@@ -53,7 +55,7 @@ async function main() {
         // console.log(`   Transaction Hash: ${setMinThresholdTx.hash}`);
         // await setMinThresholdTx.wait();
         // console.log("   ✅ Min Threshold set successfully!");
-        
+
         // Step 1: Add liquidity
         console.log("\n➕ Step 1: Adding Liquidity...");
         const addTx = await TenexiumProtocol.addLiquidity({ value: testAmountForAdding });
