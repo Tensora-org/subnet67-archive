@@ -683,37 +683,6 @@ contract TenexiumProtocol is
         if (!success) revert TenexiumErrors.TransferFailed();
     }
 
-    // ==================== CROWDLOAN FUNCTIONS ====================
-
-    /**
-     * @notice Contribute to a crowdloan
-     * @param crowdloanId The id of the crowdloan to contribute to
-     * @param amount The amount of TAO to contribute
-     */
-    function contributeToCrowdloan(uint32 crowdloanId, uint256 amount) external payable nonReentrant {
-        bytes memory data =
-            abi.encodeWithSelector(CROWDLOAN_PRECOMPILE.contribute.selector, crowdloanId, amount.weiToRao());
-        (bool success,) = address(CROWDLOAN_PRECOMPILE).delegatecall{gas: gasleft()}(data);
-        if (!success) revert TenexiumErrors.CrowdloanContributionFailed();
-        crowdloanContribution[msg.sender] = crowdloanContribution[msg.sender].safeAdd(amount);
-    }
-
-    /**
-     * @notice Withdraw from a crowdloan
-     * @param crowdloanId The id of the crowdloan to withdraw from
-     */
-    function withdrawFromCrowdloan(uint32 crowdloanId) external payable nonReentrant {
-        uint256 amount = AlphaMath.raoToWei(
-            CROWDLOAN_PRECOMPILE.getContribution(crowdloanId, addressConversionContract.addressToSS58Pub(msg.sender))
-        );
-        if (amount == 0) revert TenexiumErrors.InvalidValue();
-
-        crowdloanContribution[msg.sender] = crowdloanContribution[msg.sender].safeSub(amount);
-        bytes memory data = abi.encodeWithSelector(CROWDLOAN_PRECOMPILE.withdraw.selector, crowdloanId);
-        (bool success,) = address(CROWDLOAN_PRECOMPILE).delegatecall{gas: gasleft()}(data);
-        if (!success) revert TenexiumErrors.CrowdloanWithdrawalFailed();
-    }
-
     // ==================== LIQUIDITY PROVIDER TRACKING FUNCTIONS ====================
 
     /**
@@ -726,24 +695,10 @@ contract TenexiumProtocol is
         if (liquidityProviderSet[hotkey][user] || uniqueLiquidityProviders[user]) {
             revert TenexiumErrors.AddressAlreadyAssociated();
         }
-        if (groupLiquidityProviders[hotkey].length >= maxLiquidityProvidersPerHotkey) {
-            revert TenexiumErrors.MaxLiquidityProvidersPerHotkeyReached();
-        }
         uniqueLiquidityProviders[user] = true;
         groupLiquidityProviders[hotkey].push(user);
         liquidityProviderSet[hotkey][user] = true;
         return true;
-    }
-
-    /**
-     * @notice Set the maximum number of liquidity providers per hotkey
-     * @param _maxLiquidityProvidersPerHotkey The maximum number of liquidity providers per hotkey
-     */
-    function setMaxLiquidityProvidersPerHotkey(uint256 _maxLiquidityProvidersPerHotkey) public onlyManager {
-        if (_maxLiquidityProvidersPerHotkey == 0 || _maxLiquidityProvidersPerHotkey > 10) {
-            revert TenexiumErrors.InvalidValue();
-        }
-        maxLiquidityProvidersPerHotkey = _maxLiquidityProvidersPerHotkey;
     }
 
     /**
