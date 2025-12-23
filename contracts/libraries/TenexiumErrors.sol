@@ -66,8 +66,4 @@ library TenexiumErrors {
 
     // Register
     error NotRegister();
-
-    // Crowdloan
-    error CrowdloanContributionFailed();
-    error CrowdloanWithdrawalFailed();
 }
