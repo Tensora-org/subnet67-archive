@@ -174,6 +174,54 @@ contract StakingWrapper is Initializable, OwnableUpgradeable, UUPSUpgradeable, R
         if (!success) revert StakeFailed();
     }
 
+    /**
+     * @notice Transfer stake from one hotkey to another (potentially across netuids)
+     * @dev Uses delegatecall to preserve msg.sender context in precompile
+     * @param originHotkey Origin validator hotkey to transfer stake from
+     * @param destinationHotkey Destination validator hotkey to transfer stake to
+     * @param originNetuid Origin subnet ID
+     * @param destinationNetuid Destination subnet ID
+     * @param amount Amount of stake to transfer
+     */
+    function transferStake(
+        bytes32 originHotkey,
+        bytes32 destinationHotkey,
+        bytes32 destinationColdkey,
+        uint16 originNetuid,
+        uint16 destinationNetuid,
+        uint256 amount
+    ) external nonReentrant {
+        if (amount == 0) revert AmountZero();
+        if (originHotkey == bytes32(0)) revert InvalidValue();
+        if (destinationHotkey == bytes32(0)) revert InvalidValue();
+        if (destinationColdkey == bytes32(0)) revert InvalidValue();
+
+        bytes memory data = abi.encodeWithSelector(
+            STAKING_PRECOMPILE.moveStake.selector,
+            originHotkey,
+            destinationHotkey,
+            uint256(originNetuid),
+            uint256(destinationNetuid),
+            amount
+        );
+        (bool success,) = address(STAKING_PRECOMPILE).delegatecall{gas: gasleft()}(data);
+        if (!success) revert TransferFailed();
+
+        // Encode the transferStake call
+        data = abi.encodeWithSelector(
+            STAKING_PRECOMPILE.transferStake.selector,
+            destinationColdkey,
+            destinationHotkey,
+            uint256(destinationNetuid),
+            uint256(destinationNetuid),
+            amount
+        );
+
+        // Execute transfer stake operation using delegatecall to preserve msg.sender
+        (success,) = address(STAKING_PRECOMPILE).delegatecall{gas: gasleft()}(data);
+        if (!success) revert StakeFailed();
+    }
+
     // ==================== ADMIN FUNCTIONS ====================
 
     /**
