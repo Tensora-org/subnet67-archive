@@ -1,5 +1,9 @@
 # Tenexium
 
+> ⚠️ **Archive Notice**: This repository is an archived copy of the original Tenexium/tenex-subnet project, maintained by [Tensora-org](https://github.com/Tensora-org) for historical reference and community access. The original repository is no longer available. All code and commit history remain attributed to the original authors.
+
+---
+
 > **Decentralized Long-Only Spot Margin Protocol for the Bittensor Network**
 
 **Tenexium** operates as a spot margin protocol within the Bittensor ecosystem, serving as the core infrastructure for the Tenex subnet. The protocol enables users to establish leveraged long positions on subnet tokens using TAO as collateral, while providing TAO liquidity providers with sustainable yields through both Bittensor miner emissions and protocol-generated fees from trading, borrowing, and liquidations.
